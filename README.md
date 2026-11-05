@@ -36,7 +36,7 @@
 - [x] VS Code의 GitHub 계정 연결 
 - [x] GitHub 원격 저장소 생성·업로드·제출 링크 확인 
   ### GitHub 제출 주소
-  https://github.com/tajoral87/codysseyallinone1
+  https://github.com/tajoral87-code/codysseyallinone1
 
 ## 4. 터미널 조작, 폴더 및 권한 실습
 
@@ -268,3 +268,129 @@ docker run -d -p 8080:80 --name my-web my-web
 ## 13. 결론
 
 Docker를 이용해 동일한 웹서버 실행 환경을 구성하고, 포트 매핑으로 브라우저에서 접속하는 과정을 경험했습니다. 바인드 마운트는 개발 중 코드 변경을 빠르게 반영하고, 볼륨은 컨테이너 수명과 분리해 데이터를 유지하는 데 유용하다는 점을 확인했습니다. Git/GitHub는 이러한 코드를 기록하고 제출·공유하는 마지막 단계입니다.
+
+
+## 프로젝트 파일 구조
+
+```text
+codysseyallinone1/
+├── README.md       # 전체 실습 보고서
+├── Dockerfile      # NGINX 웹서버 이미지 생성 설정
+├── index.html      # Docker로 실행한 웹페이지
+└── screenshots/    # 실습 과정과 실행 결과 캡처
+```
+
+### 파일별 역할
+
+- **README.md**: 실습 목표, 사용 명령어, 실행 결과 및 오류 해결 과정을 정리한 보고서
+- **Dockerfile**: NGINX 이미지를 기반으로 웹페이지를 포함한 Docker 이미지를 만드는 설정 파일
+- **index.html**: 브라우저에 표시되는 웹페이지 내용
+- **screenshots/**: Docker, Ubuntu, Git 명령어 실행 결과와 실습 증거를 보관하는 폴더
+
+Git 연결 및 커밋 확인 화면:
+
+![Git 원격 저장소 및 커밋 기록](screenshots/17_git_remote_log.png)
+
+
+
+## Docker 네트워크 네임스페이스와 포트 매핑
+
+Docker 컨테이너는 기본적으로 호스트 컴퓨터와 분리된 네트워크 공간을 사용합니다. Linux에서는 이를 네트워크 네임스페이스(Network Namespace)라고 합니다.
+
+네트워크 네임스페이스는 컨테이너마다 네트워크 인터페이스, IP 주소, 라우팅 정보와 포트 공간 등을 분리하는 역할을 합니다.
+
+실습에서 사용한 `-p 8080:80`은 호스트 컴퓨터의 8080번 포트로 들어오는 요청을 컨테이너 내부의 80번 포트로 전달하는 설정입니다.
+
+따라서 컨테이너의 네트워크는 분리되어 있어도 포트 매핑을 통해 브라우저에서 `localhost:8080`으로 NGINX 웹서버에 접속할 수 있습니다.
+
+
+
+## Docker 포트 충돌 진단과 해결 방법
+
+Docker에서 호스트의 특정 포트를 이미 다른 프로그램이 사용 중이면 포트 충돌이 발생할 수 있습니다.
+
+### 1. 포트 사용 여부 확인
+
+Windows PowerShell에서 다음 명령어를 사용합니다.
+
+```powershell
+netstat -ano | findstr :8080
+```
+
+LISTENING 상태인 항목의 PID를 확인하여 포트를 사용하는 프로세스를 식별할 수 있습니다.
+
+### 2. Docker 컨테이너 확인
+
+```powershell
+docker ps
+```
+
+실행 중인 컨테이너가 어떤 호스트 포트를 사용하고 있는지 확인합니다.
+
+### 3. 충돌 해결 방법
+
+기존 my-web 컨테이너가 원인이라면 다음 명령으로 중지할 수 있습니다.
+
+```powershell
+docker stop my-web
+```
+
+또는 사용 가능한 다른 포트를 지정할 수 있습니다.
+
+```powershell
+docker run -d -p 8081:80 --name my-web-alt my-web
+```
+
+이 경우 브라우저 접속 주소는 localhost:8081입니다.
+
+다른 Windows 프로그램이 포트를 사용한다면 해당 프로그램을 확인하고 정상 종료하거나, 충돌하지 않는 포트를 선택합니다.
+
+※ 위 절차는 포트 충돌 상황에 대비한 진단·해결 방법입니다. 실제 포트 충돌 실습을 수행했다는 의미는 아닙니다.
+
+
+
+## Docker 볼륨 백업과 복원 방법
+
+Docker 볼륨은 컨테이너를 삭제해도 데이터를 유지하지만, 볼륨 자체가 삭제되거나 저장 장치에 문제가 발생하면 데이터가 손실될 수 있습니다.
+
+따라서 중요한 데이터는 볼륨 외부에 별도의 백업 파일로 보관하는 것이 좋습니다.
+
+### 1. 볼륨 백업
+
+기존 실습에서 사용한 mydata 볼륨을 tar.gz 파일로 백업하는 방법입니다.
+
+Windows PowerShell에서 프로젝트 폴더로 이동한 후 실행합니다.
+
+```powershell
+docker run --rm -v mydata:/source:ro -v "${PWD}:/backup" ubuntu tar -czf /backup/mydata-backup.tar.gz -C /source .
+```
+
+- mydata:/source:ro : 기존 볼륨을 읽기 전용으로 연결
+- ${PWD}:/backup : 현재 PC의 폴더를 백업 저장 위치로 연결
+- tar -czf : 파일들을 압축해 백업 파일 생성
+
+### 2. 백업 데이터 복원
+
+원본 볼륨을 보호하기 위해 새로운 볼륨에 복원합니다.
+
+```powershell
+docker volume create mydata-restored
+docker run --rm -v mydata-restored:/target -v "${PWD}:/backup:ro" ubuntu tar -xzf /backup/mydata-backup.tar.gz -C /target
+```
+
+### 3. 복원 결과 확인
+
+```powershell
+docker run --rm -v mydata-restored:/data ubuntu cat /data/memo.txt
+```
+
+기존 실습 파일이 정상적으로 복원되었다면 hello volume이 출력되어야 합니다.
+
+### 백업 관리 원칙
+
+백업 파일은 원본 볼륨과 다른 저장 장치나 안전한 외부 저장소에도 보관하는 것이 좋습니다.
+
+중요한 데이터는 주기적으로 백업하고, 실제 복원이 가능한지도 확인해야 합니다.
+
+※ 위 명령어는 볼륨 백업과 복원 방법을 설명한 예시이며, 실제 백업·복원 실행 결과를 검증한 것은 아닙니다.
+
