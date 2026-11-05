@@ -33,8 +33,10 @@
 - [x] 바인드 마운트로 `index.html` 수정 반영 (`8082:80`)
 - [x] Docker 볼륨에 저장 후 컨테이너 삭제 전후 데이터 유지 확인
 - [x] Git 사용자 이름·이메일·기본 브랜치(main) 설정
-- [ ] VS Code의 GitHub 계정 연결 **(최종 확인 및 증거 추가 필요)**
-- [ ] GitHub 원격 저장소 생성·업로드·제출 링크 확인 **(완료 후 체크)**
+- [x] VS Code의 GitHub 계정 연결 
+- [x] GitHub 원격 저장소 생성·업로드·제출 링크 확인 
+  ### GitHub 제출 주소
+  https://github.com/tajoral87/codysseyallinone1
 
 ## 4. 터미널 조작, 폴더 및 권한 실습
 
