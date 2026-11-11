@@ -394,3 +394,79 @@ docker run --rm -v mydata-restored:/data ubuntu cat /data/memo.txt
 
 ※ 위 명령어는 볼륨 백업과 복원 방법을 설명한 예시이며, 실제 백업·복원 실행 결과를 검증한 것은 아닙니다.
 
+
+---
+
+## 보너스 과제: Docker Compose 실습
+
+### 1. Docker Compose 기초
+기존 Dockerfile과 index.html을 활용하여
+compose.yaml 파일을 작성했다.
+
+실행 명령어:
+```bash
+docker compose up -d --build
+docker compose ps
+```
+
+실행 결과:
+- NGINX 웹서버 이미지 빌드 성공
+- Compose 전용 네트워크 생성
+- localhost:8083 웹페이지 접속 성공
+
+### 2. 멀티 컨테이너 구성
+NGINX(web)와 Python HTTP 서버(api)를
+하나의 Compose 프로젝트에서 실행했다.
+
+통신 확인:
+```bash
+docker compose exec web curl -I http://api:8000
+```
+
+실행 결과:
+- web, api 컨테이너 모두 정상 실행
+- 컨테이너 사이의 HTTP 통신 성공
+- HTTP/1.0 200 OK 응답 확인
+
+### 3. Compose 운영 명령어
+다음 명령어를 직접 실행하고 결과를 확인했다.
+
+- docker compose up -d --build
+- docker compose ps
+- docker compose logs --tail 10 web
+- docker compose down
+
+down 실행 후 ps 결과가 비어 있는 것을 확인했다.
+
+### 4. 환경 변수 활용
+compose.yaml에서 환경 변수를 사용했다.
+
+```yaml
+ports:
+  - "${WEB_PORT:-8083}:80"
+```
+
+.env 파일:
+```dotenv
+WEB_PORT=8084
+```
+
+실행 결과:
+- docker compose config 문법 검사 성공
+- published: "8084" 확인
+- localhost:8084 접속 성공
+
+보안 관리:
+- .env는 .gitignore로 Git 추적에서 제외
+- .env.example에 설정 예시 제공
+
+### 5. 문제 해결 기록
+1. Docker 엔진 미실행으로 API 연결 오류 발생
+   → Docker Desktop 실행 후 해결
+2. compose.yaml의 YAML 문법 오류 발생
+   → 들여쓰기를 수정하고 docker compose config로 검증
+3. favicon.ico 요청에서 404 발생
+   → 사이트 아이콘 파일이 없는 것이 원인이며,
+     웹페이지 자체는 정상적으로 작동함
+```
+
