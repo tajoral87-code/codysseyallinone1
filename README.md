@@ -470,3 +470,34 @@ WEB_PORT=8084
      웹페이지 자체는 정상적으로 작동함
 ```
 
+### 6. GitHub SSH 인증 실습
+
+GitHub 계정에 ED25519 SSH 공개키를 등록하고
+SSH 방식으로 GitHub 저장소에 접속했다.
+
+실습 과정:
+1. ssh-keygen으로 공개키와 개인키 생성
+2. GitHub 계정에 공개키 등록
+3. 기본 SSH 22번 포트 연결 시간 초과 확인
+4. SSH 443번 포트로 인증 성공
+5. SSH config 파일 설정
+6. 원격 저장소 주소를 HTTPS에서 SSH로 변경
+7. SSH 방식으로 보너스 브랜치 Push 성공
+
+확인 명령어:
+
+```bash
+ssh -T git@github.com
+git remote -v
+git push -u origin bonus-docker-compose
+```
+
+검증 결과:
+- GitHub 계정 tajoral87-code 인증 성공
+- SSH 공개키를 통한 인증 확인
+- bonus-docker-compose 브랜치 GitHub 업로드 성공
+
+보안 원칙:
+- SSH 개인키와 암호는 외부에 공개하지 않음
+- 공개키만 GitHub 계정에 등록
+
